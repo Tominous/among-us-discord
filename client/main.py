@@ -40,7 +40,7 @@ def dissector(packet):
     if not (debug or enable_sniff):
         return
 
-    # print(bytes(packet).hex())
+     print(bytes(packet).hex())
 
     if packet.haslayer(UDP) and packet.haslayer(IP):
         udp_layer = packet.getlayer(UDP)
@@ -48,7 +48,7 @@ def dissector(packet):
     else:
         return
 
-    # print(dir(packet.payload.payload))
+     print(dir(packet.payload.payload))
     data = bytes(udp_layer.payload)
     if  (len(data) == 22 and data.startswith(b'\x00\x12\x00\x05')) or \
         (len(data) == 23 and data.startswith(b'\x00\x13\x00\x05')):
@@ -60,7 +60,7 @@ def dissector(packet):
 
         room_code = int.from_bytes(data[4:8], byteorder="little", signed=True)
         room_code = int_to_room_code_v2(room_code)
-        # print(message.type, new_code)
+         print(message.type, new_code)
         if current_room_code != room_code and room_code != "QQQQQQ":
             change_state(States.joined)
             communicator.set_mute(0)
@@ -77,7 +77,7 @@ def dissector(packet):
     if isRoomMessage:
         message = packet[RoomMessage]
         if is_among_us_packet:
-            # print("RM type", message.type)
+             print("RM type", message.type)
             if state != States.game_started and message.type == RoomMessageType.START_GAME:
                 print("Game started")
                 record_data = True
@@ -91,7 +91,7 @@ def dissector(packet):
 
     if isRPC:
         rpc = packet[RPC]
-        # print("RPC type", rpc.rpcAction)
+         print("RPC type", rpc.rpcAction)
         if record_data and rpc.rpcAction == RPCAction.UPDATEGAMEDATA:
             print("Recoreded player data", rpc.updateGameData.players)
             game_players_data = rpc.updateGameData.players
@@ -109,8 +109,8 @@ def dissector(packet):
                 sleep(meeting_end_mute_delay)
                 communicator.set_mute(1)
 
-# def get_ports(packet):
-#     print(packet.getlayer(UDP).sport, '-->', packet.getlayer(UDP).dport)
+ def get_ports(packet):
+     print(packet.getlayer(UDP).sport, '-->', packet.getlayer(UDP).dport)
 
 def get_communicator():
     global communicator, enable_sniff, comm_thread, secret_key, current_room_code
@@ -184,38 +184,38 @@ def main():
 if __name__ == '__main__':
     main()
 
-# class MyGrid(Widget):
-#     input_key = ObjectProperty(None)
-#     output = ObjectProperty(None)
-#     label_room_code = ObjectProperty(None)
-#     label_current_state = ObjectProperty(None)
-#     label_bot_server = ObjectProperty(None)
-#     label_current_key = ObjectProperty(None)
-#
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         elements.output = self.output
-#         elements.label_room_code = self.label_room_code
-#         elements.label_current_state = self.label_current_state
-#         elements.label_bot_server = self.label_bot_server
-#         elements.label_current_key = self.label_current_key
-#
-#         sniffing_thread = threading.Thread(target=lambda:
-#         sniff(prn=dissector, filter=f"udp", store=False,
-#               started_callback=lambda: output_print(elements.output, f"listening to packets.")))
-#         sniffing_thread.daemon = True
-#         sniffing_thread.start()
-#
-#     def changed_key(self):
-#         global secret_key, comm_thread, enable_sniff
-#         self.input_key.text = self.input_key.text.strip()
-#         if valid_and_different_key(self.input_key.text, secret_key):
-#             secret_key = self.input_key.text.strip()
-#             output_print(elements.output, f"Set key: {secret_key}")
-#             enable_sniff = False
-#             comm_thread = threading.Thread(target=get_communicator)
-#             comm_thread.daemon = True
-#             comm_thread.start()
-#
-#     def open_repo(self):
-#         webbrowser.open('https://github.com/FlafyDev/among-us-discord')
+ class MyGrid(Widget):
+     input_key = ObjectProperty(None)
+     output = ObjectProperty(None)
+     label_room_code = ObjectProperty(None)
+     label_current_state = ObjectProperty(None)
+     label_bot_server = ObjectProperty(None)
+     label_current_key = ObjectProperty(None)
+
+     def __init__(self, **kwargs):
+         super().__init__(**kwargs)
+         elements.output = self.output
+         elements.label_room_code = self.label_room_code
+         elements.label_current_state = self.label_current_state
+         elements.label_bot_server = self.label_bot_server
+         elements.label_current_key = self.label_current_key
+
+         sniffing_thread = threading.Thread(target=lambda:
+         sniff(prn=dissector, filter=f"udp", store=False,
+               started_callback=lambda: output_print(elements.output, f"listening to packets.")))
+         sniffing_thread.daemon = True
+         sniffing_thread.start()
+
+     def changed_key(self):
+         global secret_key, comm_thread, enable_sniff
+         self.input_key.text = self.input_key.text.strip()
+         if valid_and_different_key(self.input_key.text, secret_key):
+             secret_key = self.input_key.text.strip()
+             output_print(elements.output, f"Set key: {secret_key}")
+             enable_sniff = False
+             comm_thread = threading.Thread(target=get_communicator)
+             comm_thread.daemon = True
+             comm_thread.start()
+
+     def open_repo(self):
+         webbrowser.open('https://github.com/FlafyDev/among-us-discord')
